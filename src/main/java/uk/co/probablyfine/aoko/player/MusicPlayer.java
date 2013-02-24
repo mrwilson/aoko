@@ -102,5 +102,17 @@ public class MusicPlayer {
 		log.debug("Stopping track now.");
 		this.playTrackProcess.destroy();
 	}
+
+	public void setPlayerPath(String playerPath) {
+		this.playerPath = playerPath;
+	}
+
+	public void setPlayerTimeout(long playerTimeout) {
+		this.playerTimeout = playerTimeout;
+	}
+
+	public void setDownloadPath(String downloadPath) {
+		this.downloadPath = downloadPath;
+	}
 	
 }

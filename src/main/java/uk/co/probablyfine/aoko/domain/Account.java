@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -51,19 +52,17 @@ public class Account {
 	public void setUsername(String username) {
 		this.username = username;
 	}
-
+	
+	@JsonIgnore
 	public String getPassword() {
 		return password;
 	}
-
+	
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
-	public UserDetails toUser() {
-		return new User(this.username, this.password, Collections.<GrantedAuthority>singleton(new SimpleGrantedAuthority(this.role)));
-	}
-
+	@JsonIgnore
 	public String getRole() {
 		return role;
 	}
@@ -72,9 +71,8 @@ public class Account {
 		this.role = role;
 	}
 	
-	@Override
-	public String toString() {
-		return this.username;
+	public UserDetails toUser() {
+		return new User(this.username, this.password, Collections.<GrantedAuthority>singleton(new SimpleGrantedAuthority(this.role)));
 	}
 	
 }

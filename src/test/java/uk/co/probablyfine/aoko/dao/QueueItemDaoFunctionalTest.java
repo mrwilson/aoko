@@ -1,7 +1,6 @@
 package uk.co.probablyfine.aoko.dao;
 
 import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static uk.co.probablyfine.aoko.domain.FileType.YOUTUBE;
 import static uk.co.probablyfine.aoko.domain.PlayerState.PLAYED;
@@ -13,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,9 +37,11 @@ public class QueueItemDaoFunctionalTest {
 	private final QueueItem item2 = new QueueItem();
 	private final QueueItem item3 = new QueueItem();
 	
-	private final Map<String,String> meta = new HashMap<String,String>() {{ put("artist", "bar"); }};
+	private final Map<String,String> meta = new HashMap<String,String>(); 
 	
-	private final Account account = new Account("foo", "bar", "ROLE_USER");;
+	{ meta.put("artist", "bar"); }
+	
+	private final Account account = new Account("foo", "bar", "ROLE_USER");
 	
 	@Before
 	public void setUp() {

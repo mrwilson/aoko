@@ -41,10 +41,9 @@ public class QueueService {
 	
 	public Collection<Collection<QueueItem>> getQueueLayout() {
 		
-		List<QueueItem> resultsList = queue.getAllUnplayed();
+		final List<QueueItem> resultsList = queue.getAllUnplayed();
 		
-		if (resultsList.size() == 0)
-			return new ArrayList<Collection<QueueItem>>();
+		if (resultsList.size() == 0) return new ArrayList<Collection<QueueItem>>();
 		
 		Collections.sort(resultsList);
 		

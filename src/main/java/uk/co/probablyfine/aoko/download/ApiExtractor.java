@@ -82,8 +82,6 @@ public class ApiExtractor {
 	
 	public String getAsinFromMusicbrainz(Map<String,String> metadata) throws UnsupportedEncodingException {
 		
-		//TODO: Xpath
-		
 		List<String> queryString = new ArrayList<String>();
 		
 		if (metadata.containsKey("album") && (metadata.containsKey("artist") || metadata.containsKey("album_artist"))) {

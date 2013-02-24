@@ -111,7 +111,7 @@ public class QueueItem implements Comparable<QueueItem>{
 	}
 	
 	public String toString() {
-		return this.userName + "--" + musicFile.toString();		
+		return musicFile.toString();		
 	}
 	
 }

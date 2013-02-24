@@ -19,7 +19,6 @@ import uk.co.probablyfine.aoko.player.MusicPlayer;
 public class AdminController {
 
 	@Autowired private AccountDao accounts;
-	
 	@Autowired private MusicPlayer player;
 
 	private final Logger log = LoggerFactory.getLogger(AdminController.class);

@@ -95,6 +95,4 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 
-
-
 </beans>

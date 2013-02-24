@@ -164,7 +164,7 @@ public class QueueItemDao {
 				cb.equal(root.get(QueueItem_.bucket), bucket),
 				cb.equal(root.get(QueueItem_.userName), user)
 			)
-		);	
+		);
 				
 		QueueItem qi = null;
 		

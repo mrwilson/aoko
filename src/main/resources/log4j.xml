@@ -9,7 +9,7 @@
 	</appender>
 
 	<logger name="uk.co.probablyfine.aoko">
-		<level value="debug" />
+		<level value="trace" />
 	</logger>
 
 	<logger name="org.jaudiotagger.*">
