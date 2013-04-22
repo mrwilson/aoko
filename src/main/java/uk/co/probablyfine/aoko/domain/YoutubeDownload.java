@@ -1,5 +1,8 @@
 package uk.co.probablyfine.aoko.domain;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -26,6 +29,9 @@ public class YoutubeDownload implements Comparable<YoutubeDownload> {
 	
 	@Column(nullable = false)
 	private String queuedBy;
+
+	private static final Pattern VIMEO_CODE = Pattern.compile(".*/([0-9]+)$");
+	private static final Pattern YOUTUBE_CODE = Pattern.compile("(?<=v=).*?(?=&|$)");
 	
 	public YoutubeDownload() {}
 	
@@ -91,8 +97,29 @@ public class YoutubeDownload implements Comparable<YoutubeDownload> {
 	
 	@Override
 	public String toString() {
-		return String.format("Id: %s, Bucket: %d, Id: %d", this.url,this.bucket,this.id);
+		return String.format("Url: %s, Bucket: %d, Id: %d", this.url,this.bucket,this.id);
+	}
+	
+	public String getVideoCode() {
+		if (getFileType() == FileType.VIMEO) {
+			final Matcher m = VIMEO_CODE.matcher(this.getUrl());
+			m.find();
+			return m.group(1);
+			
+		} else {
+			final Matcher m = YOUTUBE_CODE.matcher(this.getUrl());
+			m.find();
+			return m.group(0);
+		}
+		
 	}
 
+	public FileType getFileType() {
+		if (this.getUrl().contains("vimeo")) {
+			return FileType.VIMEO;
+		} else {
+			return FileType.YOUTUBE;
+		}
+	}
 	
 }

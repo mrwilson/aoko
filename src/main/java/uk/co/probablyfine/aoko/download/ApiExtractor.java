@@ -29,15 +29,16 @@ import com.google.common.collect.Maps;
 @Service
 public class ApiExtractor {
 
+	private static final String MUSICBRAINZ = "http://musicbrainz.org/ws/2/release/?type=xml&query=%s";
+	private static final String VIMEO = "http://vimeo.com/api/v2/video/%d.xml";
+	
 	@Autowired private ArtDownloader artDownloader;
-	
 	private final XPath xpath = XPathFactory.newInstance().newXPath();
-	
 	private final Logger log = LoggerFactory.getLogger(ApiExtractor.class);
 	
 	public Map<String,String> getVimeoData(String videoId) {
-		
-		final String url = "http://vimeo.com/api/v2/video/"+videoId+".xml";
+
+		final String url = String.format(VIMEO, videoId);
 		
 		log.debug("Attempting to parse {}",url);
 		
@@ -45,21 +46,16 @@ public class ApiExtractor {
 		
 		try {
 			final Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new URL(url).openStream());
-		
 			final String title = xpath.evaluate("/videos/video/title", doc); 
-		
-			log.debug("Video title: {}",title);
-			
 			xpath.reset();
-			
-			results.put("name", title);
-			
 			final String artUrl = xpath.evaluate("/videos/video/thumbnail_medium", doc);
-		
+
+			log.debug("Video title: {}",title);
+			results.put("name", title);
+
 			artDownloader.getVimeoArt(artUrl, videoId);
-		
 			results.put("artlocation", artUrl);
-			
+
 		} catch (MalformedURLException e) {
 			log.error("Badly formed url, returning");
 			log.error("Exception: {}",e);
@@ -95,9 +91,10 @@ public class ApiExtractor {
 			throw new RuntimeException("Insufficient data for album art");
 		}
 		
-		String url = "http://musicbrainz.org/ws/2/release/?type=xml&query="+URLEncoder.encode(Joiner.on(" ").join(queryString),"UTF-8");
+		final String encodedQueryString = URLEncoder.encode(Joiner.on(" ").join(queryString),"UTF-8");
+		final String url = String.format(MUSICBRAINZ,encodedQueryString);
 		
-		Document doc;
+		final Document doc;
 		try {
 			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new URL(url).openStream());
 		} catch (Exception e) {
@@ -110,6 +107,5 @@ public class ApiExtractor {
 		return nodes.item(0).getChildNodes().item(0).getNodeValue();
 		
 	}
-	
 	
 }

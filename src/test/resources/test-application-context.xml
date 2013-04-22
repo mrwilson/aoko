@@ -15,8 +15,60 @@
 	<context:component-scan base-package="uk.co.probablyfine.aoko" />
 	<mvc:annotation-driven validator="validator" />
 	<context:annotation-config />
-	
-	<context:property-placeholder location="classpath:test.properties" />
+
+	<context:property-placeholder location="classpath:spring/musicserver.properties" />
+
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"></bean>
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"></bean>
+
+	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/resources/, file:${media.art}, file:${media.repository}" />
+
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="${media.uploadlimit}" />
+	</bean>
+
+	<bean id="securityLoginSuccessHandler" class="uk.co.probablyfine.aoko.service.LoginSuccessHandler">
+	</bean>
+ 
+	<bean id="securityLoginFailureHandler" class="uk.co.probablyfine.aoko.service.LoginFailureHandler" >
+	</bean>
+
+	<bean id="authenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="filterProcessesUrl" value="/j_spring_security_check" />
+		<property name="authenticationFailureHandler" ref="securityLoginFailureHandler" />
+		<property name="authenticationSuccessHandler" ref="securityLoginSuccessHandler" />
+	</bean>
+
+	<bean id="loginUrlAuthenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<property name="loginFormUrl" value="/login" />
+	</bean>
+
+	<security:http auto-config="false" use-expressions="true" entry-point-ref="loginUrlAuthenticationEntryPoint" disable-url-rewriting="true">
+		<security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
+		<security:logout invalidate-session="true" logout-success-url="/" logout-url="/logout" />
+		<security:custom-filter ref="authenticationFilter" position="FORM_LOGIN_FILTER"/>
+		<security:remember-me key="rememberMeKey" user-service-ref="musicServerUserDetails"/>
+	</security:http>
+
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider user-service-ref="musicServerUserDetails">
+			<security:password-encoder ref="passwordEncoder" />
+		</security:authentication-provider>
+	</security:authentication-manager>
+
+	<bean id="passwordEncoder" class="org.springframework.security.crypto.password.StandardPasswordEncoder">
+		<constructor-arg value="It was you who broke my mason plate." />
+	</bean>
+
+	<bean id="singleThreadExecutor" class="java.util.concurrent.Executors" factory-method="newSingleThreadExecutor"></bean>
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
 
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
 		destroy-method="close">
@@ -41,58 +93,6 @@
 				<prop key="hibernate.ejb.naming_strategy">org.hibernate.cfg.ImprovedNamingStrategy</prop>
 			</props>
 		</property>
-	</bean>
-
-	<bean id="validator"
-		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
-	<bean id="viewResolver"
-		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="viewClass"
-			value="org.springframework.web.servlet.view.JstlView"></property>
-		<property name="prefix" value="/WEB-INF/jsp/"></property>
-		<property name="suffix" value=".jsp"></property>
-	</bean>
-
-	<mvc:resources mapping="/resources/**"
-		location="/, classpath:/META-INF/resources/, file:${media.art}, file:${media.repository}" />
-	<bean id="multipartResolver"
-		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-		<property name="maxUploadSize" value="100" />
-	</bean>
-
-	<security:http auto-config="true" use-expressions="true"
-		access-denied-page="/login/denied" disable-url-rewriting="true">
-		<security:intercept-url pattern="/login"
-			access="permitAll" />
-
-		<security:form-login login-page="/login/"
-			authentication-failure-url="/login/?error=true" default-target-url="/" />
-
-		<security:intercept-url pattern="/admin/**"
-			access="hasRole('ROLE_ADMIN')" />
-
-		<security:logout invalidate-session="true"
-			logout-success-url="/" logout-url="/logout" />
-
-	</security:http>
-
-	<security:authentication-manager>
-		<security:authentication-provider
-			user-service-ref="musicServerUserDetails">
-			<security:password-encoder ref="passwordEncoder" />
-		</security:authentication-provider>
-	</security:authentication-manager>
-
-	<bean id="passwordEncoder"
-		class="org.springframework.security.crypto.password.StandardPasswordEncoder">
-		<constructor-arg value="It was you who broke my mason plate." />
-	</bean>
-
-	<tx:annotation-driven transaction-manager="transactionManager" />
-
-	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-		<property name="entityManagerFactory" ref="entityManagerFactory" />
-		<property name="dataSource" ref="dataSource" />
 	</bean>
 
 </beans>

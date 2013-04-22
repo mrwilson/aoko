@@ -21,6 +21,8 @@ import org.xml.sax.SAXException;
 @Service
 public class ArtDownloader {
 
+	private static final String YOUTUBE_IMAGES = "http://img.youtube.com/vi/%d/1.jpg";
+	private static final String AMAZON_IMAGES = "http://ec1.images-amazon.com/images/P/%s.jpg";
 	@Value("${media.art}") private String downloadPath;
 	@Autowired private ApiExtractor apiExtractor;
 		
@@ -32,7 +34,7 @@ public class ArtDownloader {
 	}
 	
 	public void getYoutubeArt(String youtubeId) throws IOException {
-		final String url = "http://img.youtube.com/vi/"+youtubeId+"/1.jpg";
+		final String url = String.format(YOUTUBE_IMAGES, youtubeId);
 		final String path = new File(downloadPath,youtubeId+".jpg").getAbsolutePath();
 		downloadFile(path, url);
 	}
@@ -42,13 +44,13 @@ public class ArtDownloader {
 		String artUrl;
 		
 		if (args.containsKey("amazon_id")) {
-			artUrl = "http://ec1.images-amazon.com/images/P/"+args.get("amazon_id")+".jpg";
+			artUrl = String.format(AMAZON_IMAGES,args.get("amazon_id"));
 		} else {
 			String asin = apiExtractor.getAsinFromMusicbrainz(args);
 			if (asin.equals("")) {
 				throw new RuntimeException("GET request did not return asin");
 			}
-			artUrl = "http://ec1.images-amazon.com/images/P/"+asin+".jpg";
+			artUrl = String.format(AMAZON_IMAGES,asin);
 		}
 				
 		downloadFile(artUrl, downloadPath+filename+".jpg");
@@ -57,9 +59,11 @@ public class ArtDownloader {
 	
 	public void downloadFile(String url, String downloadLocation) throws IOException {
 		log.debug("Downloading art from {} to {}", url, downloadLocation);
-		URL imageRequest = new URL(url);
-		ReadableByteChannel rbc = Channels.newChannel(imageRequest.openStream());
-		FileOutputStream fos = new FileOutputStream(downloadLocation);
+		
+		final URL imageRequest = new URL(url);
+		final ReadableByteChannel rbc = Channels.newChannel(imageRequest.openStream());
+		final FileOutputStream fos = new FileOutputStream(downloadLocation);
+		
 		fos.getChannel().transferFrom(rbc, 0, 1 << 24);
 		fos.close();
 	}

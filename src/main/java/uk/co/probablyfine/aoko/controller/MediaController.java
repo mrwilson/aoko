@@ -20,7 +20,7 @@ public class MediaController {
 	@Autowired private MusicFileDao musicFiles;
 	
 	@ResponseBody
-	@RequestMapping(value="/media/",produces="application/json")
+	@RequestMapping(value="/media/", produces="application/json")
 	public Map<String,Object> getAllQueuedTracks(Model m, Principal p) {
 		final Map<String,Object> response = new HashMap<String, Object>();
 				

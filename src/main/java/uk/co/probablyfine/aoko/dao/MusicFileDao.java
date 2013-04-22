@@ -17,8 +17,7 @@ import uk.co.probablyfine.aoko.domain.MusicFile_;
 @Repository
 public class MusicFileDao {
 
-	@PersistenceContext
-	EntityManager em;
+	@PersistenceContext private EntityManager em;
 	
 	@Transactional(readOnly = true)
 	public boolean containsFile(String hexVal) {
@@ -59,5 +58,4 @@ public class MusicFileDao {
 		cq.from(MusicFile.class);
 		return em.createQuery(cq).getResultList();
 	}
-
 }

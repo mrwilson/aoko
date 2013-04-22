@@ -24,7 +24,6 @@ public class QueueController {
 	private final Logger log = LoggerFactory.getLogger(QueueController.class);
 	
 	@Autowired private QueueItemDao queue;
-	@Autowired private AccountDao accounts;
 	
 	@ResponseBody
 	@RequestMapping("move/{direction}/{bucketId}")
