@@ -29,10 +29,10 @@ import uk.co.probablyfine.aoko.download.ApiExtractor;
 import uk.co.probablyfine.aoko.download.ArtDownloader;
 import uk.co.probablyfine.aoko.download.DownloadTaskFactory;
 import uk.co.probablyfine.aoko.download.DownloadTaskFactory.DownloadTask;
+import uk.co.probablyfine.aoko.service.FileUtils;
 import uk.co.probablyfine.aoko.service.QueueService;
 
 import com.google.common.collect.Maps;
-import com.google.common.io.Files;
 
 @Service
 public class VideoQueue {
@@ -47,6 +47,7 @@ public class VideoQueue {
 	@Autowired private ArtDownloader artDownloader;
 	@Autowired private DownloadTaskFactory taskFactory;
 	@Autowired private ExecutorService singleThreadExecutor;
+	@Autowired private FileUtils utils;
 
 	@Value("${script.dltimeout}") int timeout;
 	@Value("${media.repository}") String mediaPath;
@@ -119,11 +120,11 @@ public class VideoQueue {
 		final File newFile;
 		
 		try {
-			newFile = moveFile(downloadedFile, videoCode);
+			newFile = moveDownloadedFileToRepo(downloadedFile, videoCode);
 		} catch (IOException e1) {
 			log.error("Could not move file from {}", downloadedFile.getAbsolutePath());
 			videos.markFailure(download);
-			throw new RuntimeException(e1);
+			return;
 		}
 			
 		final MusicFile file = new MusicFile();
@@ -159,13 +160,12 @@ public class VideoQueue {
 		videos.markSuccessful(download);
 	}
 	
-	public File moveFile(File downloadedFile, String path) throws IOException {
+	public File moveDownloadedFileToRepo(File downloadedFile, String path) throws IOException {
 		final String name = downloadedFile.getName();
 		final String extension = name.substring(name.lastIndexOf("."),name.length());
-		final File newFile = new File(mediaPath,path+extension);
-		Files.move(downloadedFile, newFile);
-		
-		return newFile;
+		final String newPath = mediaPath+File.separator+path+extension;
+
+		return utils.moveFile(downloadedFile, newPath);
 	}
 	
 	public void stopDownloader() {
