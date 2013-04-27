@@ -16,7 +16,7 @@
 	<mvc:annotation-driven validator="validator" />
 	<context:annotation-config />
 
-	<context:property-placeholder location="classpath:spring/musicserver.properties" />
+	<context:property-placeholder location="classpath:test.properties" />
 
 	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"></bean>
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"></bean>
