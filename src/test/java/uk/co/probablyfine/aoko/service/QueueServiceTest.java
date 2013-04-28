@@ -1,5 +1,6 @@
 package uk.co.probablyfine.aoko.service;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -35,10 +37,12 @@ public class QueueServiceTest {
 	@Mock QueueItemDao mockQueueItemDao;
 	@Mock Account mockUser;
 	@Mock MusicFile mockTrack;
-	@Mock QueueItem mockQueueItem;
+	@Mock QueueItem mockQueueItem1;
+	@Mock QueueItem mockQueueItem2;
 	private List<QueueItem> answers;
 	
-	@Before public void setup() {
+	@Before
+	public void setup() {
 		answers = new ArrayList<QueueItem>();
 		
 		doAnswer(new Answer<Void>() {
@@ -50,7 +54,8 @@ public class QueueServiceTest {
 		}).when(mockQueueItemDao).merge(Mockito.any(QueueItem.class));
 	}
 	
-	@Test public void queueTrack_shouldCreateNewBucketAndQueue_whenQueueIsEmpty() {
+	@Test
+	public void queueTrack_shouldCreateNewBucketAndQueue_whenQueueIsEmpty() {
 		Collection<QueueItem> emptyCollection = emptyList();
 		when(mockQueueItemDao.getAll()).thenReturn(emptyCollection);
 		
@@ -63,16 +68,17 @@ public class QueueServiceTest {
 		assertEquals(1, mergedItem.getPosition());
 	}
 
-	@Test public void queueTrack_shouldCreateNewBucketAndQueue_whenHasQueuedInPreviousBucket() {
+	@Test
+	public void queueTrack_shouldCreateNewBucketAndQueue_whenHasQueuedInPreviousBucket() {
 
 		String userName = "Foo";
 		
-		when(mockQueueItemDao.getAll()).thenReturn(singletonList(mockQueueItem));
-		when(mockQueueItem.getBucket()).thenReturn(1);
-		when(mockQueueItem.getPosition()).thenReturn(1);
+		when(mockQueueItemDao.getAll()).thenReturn(singletonList(mockQueueItem1));
+		when(mockQueueItem1.getBucket()).thenReturn(1);
+		when(mockQueueItem1.getPosition()).thenReturn(1);
 		
 		when(mockUser.getUsername()).thenReturn(userName);
-		when(mockQueueItem.getUserName()).thenReturn(userName);
+		when(mockQueueItem1.getUserName()).thenReturn(userName);
 		
 		queueService.queueTrack(mockUser, mockTrack);
 		QueueItem queueItem = answers.get(0);
@@ -84,10 +90,10 @@ public class QueueServiceTest {
 	
 	@Test public void queueTrack_shouldCreateNewBucketAndQueue_whenAllResultsHaveBeenPlayed() {
 
-		when(mockQueueItemDao.getAll()).thenReturn(singletonList(mockQueueItem));
-		when(mockQueueItem.getBucket()).thenReturn(1);
-		when(mockQueueItem.getPosition()).thenReturn(1);
-		when(mockQueueItem.getStatus()).thenReturn(PlayerState.PLAYED);
+		when(mockQueueItemDao.getAll()).thenReturn(singletonList(mockQueueItem1));
+		when(mockQueueItem1.getBucket()).thenReturn(1);
+		when(mockQueueItem1.getPosition()).thenReturn(1);
+		when(mockQueueItem1.getStatus()).thenReturn(PlayerState.PLAYED);
 		
 		queueService.queueTrack(mockUser, mockTrack);
 		QueueItem queueItem = answers.get(0);
@@ -97,14 +103,15 @@ public class QueueServiceTest {
 		assertEquals(1, queueItem.getPosition());
 	}
 	
-	@Test public void queueTrack_shouldAppendToCurrentBucket_whenOtherItemsInBucket() {
+	@Test
+	public void queueTrack_shouldAppendToCurrentBucket_whenOtherItemsInBucket() {
 
-		when(mockQueueItemDao.getAll()).thenReturn(singletonList(mockQueueItem));
-		when(mockQueueItem.getBucket()).thenReturn(1);
-		when(mockQueueItem.getPosition()).thenReturn(1);
+		when(mockQueueItemDao.getAll()).thenReturn(singletonList(mockQueueItem1));
+		when(mockQueueItem1.getBucket()).thenReturn(1);
+		when(mockQueueItem1.getPosition()).thenReturn(1);
 		
 		when(mockUser.getUsername()).thenReturn("Foo");
-		when(mockQueueItem.getUserName()).thenReturn("Bar");
+		when(mockQueueItem1.getUserName()).thenReturn("Bar");
 		
 		queueService.queueTrack(mockUser, mockTrack);
 		QueueItem queueItem = answers.get(0);
@@ -113,5 +120,29 @@ public class QueueServiceTest {
 		assertEquals(1, queueItem.getBucket());
 		assertEquals(2, queueItem.getPosition());
 	}
+	
+	@Test
+	public void getTrackLayout_shouldReturnEmptyListWithNothingInTheQueue() {
+		when(mockQueueItemDao.getAllUnplayed()).thenReturn(new ArrayList<QueueItem>());
+		
+		Collection<Collection<QueueItem>> queueLayout = queueService.getQueueLayout();
+		
+		assertEquals(queueLayout.size(), 0);
+	}
+	
+	@Test
+	public void getTrackLayout_shouldReturnCurrentlyQueuedTracks() {
+		when(mockQueueItemDao.getAllUnplayed()).thenReturn(Arrays.asList(mockQueueItem1,mockQueueItem2));
+		when(mockQueueItem1.getBucket()).thenReturn(1);
+		when(mockQueueItem1.getPosition()).thenReturn(1);
+		when(mockQueueItem2.getBucket()).thenReturn(2);
+		when(mockQueueItem2.getPosition()).thenReturn(1);
+		
+		Collection<Collection<QueueItem>> queueLayout = queueService.getQueueLayout();
+		
+		assertEquals(queueLayout, asList(singletonList(mockQueueItem1), singletonList(mockQueueItem2)));
+		
+	}
+	
 	
 }

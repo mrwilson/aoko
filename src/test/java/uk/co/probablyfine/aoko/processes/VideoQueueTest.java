@@ -46,6 +46,7 @@ public class VideoQueueTest {
 	@Mock private QueueService mockQueue;
 	@Mock private ApiExtractor mockApi;
 	@Mock private ArtDownloader mockArtDownloader;
+	
 	@Mock private YoutubeDownload mockDownload;
 	@Mock private Account mockUser;
 	@Mock private MusicFile mockMusicFile;

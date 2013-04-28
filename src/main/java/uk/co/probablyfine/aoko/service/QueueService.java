@@ -1,7 +1,9 @@
 package uk.co.probablyfine.aoko.service;
 
 import static com.google.common.collect.Collections2.filter;
+import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Multimaps.index;
+import static java.util.Collections.max;
 import static java.util.Collections.min;
 import static uk.co.probablyfine.aoko.domain.PlayerState.PLAYED;
 
@@ -22,7 +24,6 @@ import uk.co.probablyfine.aoko.domain.QueueItem;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 
 @Component
 public class QueueService {
@@ -47,7 +48,7 @@ public class QueueService {
 		
 		Collections.sort(resultsList);
 		
-		return index(resultsList, INDEX_BY_BUCKET).asMap().values();
+		return new ArrayList<Collection<QueueItem>>(index(resultsList, INDEX_BY_BUCKET).asMap().values());
 	}
 	
 	public void queueTrack(final Account user, final MusicFile track) {
@@ -84,7 +85,7 @@ public class QueueService {
 			
 			List<Integer> buckets = new ArrayList<Integer>();
 			
-			buckets.addAll(Collections2.transform(bucketItems, INDEX_BY_BUCKET));
+			buckets.addAll(transform(bucketItems, INDEX_BY_BUCKET));
 			
 			log.debug("User has queued in upcoming buckets, in order - {}",buckets);
 
@@ -96,7 +97,7 @@ public class QueueService {
 			finalBucket = currentbucket;
 			
 			List<QueueItem> currentBucketList = new ArrayList<QueueItem>();
-			currentBucketList.addAll(Collections2.filter(results, new Predicate<QueueItem>() {
+			currentBucketList.addAll(filter(results, new Predicate<QueueItem>() {
 				@Override
 				public boolean apply(QueueItem input) {
 					return input.getBucket() == finalBucket;
@@ -108,7 +109,7 @@ public class QueueService {
 				position = 1;
 			} else {
 				log.debug("Appending to end of current bucket.");
-				position = Collections.max(currentBucketList).getPosition()+1;
+				position = max(currentBucketList).getPosition()+1;
 			}
 			
 		} else if (results.size() != 0) {
