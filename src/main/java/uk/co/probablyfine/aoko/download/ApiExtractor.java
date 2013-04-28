@@ -51,9 +51,8 @@ public class ApiExtractor {
 			final String artUrl = xpath.evaluate("/videos/video/thumbnail_medium", doc);
 
 			log.debug("Video title: {}",title);
-			results.put("name", title);
 
-			artDownloader.getVimeoArt(artUrl, videoId);
+			results.put("name", title);
 			results.put("artlocation", artUrl);
 
 		} catch (MalformedURLException e) {

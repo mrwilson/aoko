@@ -75,7 +75,6 @@ public class VideoQueue {
 
 		if (null == download) return;
 
-		final FileType type = download.getFileType();
 		final String videoCode = download.getVideoCode();
 		final Account user = users.getFromUsername(download.getQueuedBy());
 		
@@ -108,12 +107,11 @@ public class VideoQueue {
 			return;
 		}
 
-		queueDownloadedFile(download, type, videoCode, user);
+		queueDownloadedFile(download, videoCode, user);
 					
 	}
 
-	private void queueDownloadedFile(final YoutubeDownload download, final FileType type,
-			final String videoCode, final Account user) {
+	private void queueDownloadedFile(final YoutubeDownload download, final String videoCode, final Account user) {
 		log.debug("{} has identifier {}",download.getUrl(),videoCode);
 
 		final File downloadedFile = currentTask.getDownloadedFile();
@@ -127,35 +125,14 @@ public class VideoQueue {
 			return;
 		}
 			
-		final MusicFile file = new MusicFile();
-			
-		final Map<String,String> data;
-			
-		if (download.getFileType() == FileType.VIMEO) {
-			data = api.getVimeoData(videoCode);
-			if (data.containsKey("artlocation")) {
-				file.setArtLocation(videoCode+".jpg");
-			}
-		} else {
-			data = Maps.newHashMap();
-			try {
-				artDownloader.getYoutubeArt(videoCode);
-				file.setArtLocation(videoCode+".jpg");
-			} catch (Exception e) {
-				log.error("Cannot download thumbnail for {} ",download.getUrl(),e);
-			}
-		}
-		
+		final MusicFile file = downloadMetadata(download, videoCode);
 		final String actualName = downloadedFile.getName().substring(0,downloadedFile.getName().lastIndexOf("."));
 		
-		data.put("name", actualName);
-		data.put("originalname", downloadedFile.getName());
+		file.getMetaData().put("name", actualName);
+		file.getMetaData().put("originalname", downloadedFile.getName());
 		
-		file.setType(type);
 		file.setLocation(newFile.getName());
-		file.setMetaData(data);
-		file.setUniqueId(videoCode);
-						
+								
 		queue.queueTrack(user, file);
 		videos.markSuccessful(download);
 	}
@@ -166,6 +143,36 @@ public class VideoQueue {
 		final String newPath = mediaPath+File.separator+path+extension;
 
 		return utils.moveFile(downloadedFile, newPath);
+	}
+	
+	public MusicFile downloadMetadata(final YoutubeDownload download, final String videoCode) {
+		final MusicFile file = new MusicFile();
+		
+		final Map<String,String> data = Maps.newHashMap();
+			    
+		if (download.getFileType() == FileType.VIMEO) {
+			data.putAll(api.getVimeoData(videoCode));
+		}
+		
+		try {
+			
+			if (download.getFileType() == FileType.VIMEO && data.containsKey("artlocation")) {
+				artDownloader.getVimeoArt(data.get("artlocation"), videoCode);
+			} else {
+				artDownloader.getYoutubeArt(videoCode);
+			}
+			
+			file.setArtLocation(videoCode+".jpg");
+			
+		} catch (Exception e) {
+			log.error("Cannot download thumbnail for {} ",download.getUrl(),e);
+		}
+
+		file.setType(download.getFileType());
+		file.setMetaData(data);
+		file.setUniqueId(videoCode);
+		
+		return file;
 	}
 	
 	public void stopDownloader() {
