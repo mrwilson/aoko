@@ -86,9 +86,21 @@ public class VideoQueueTest {
 	}
 	
 	@Test
-	public void shouldAbort_ifDownloadFails() throws InterruptedException, ExecutionException, TimeoutException {
+	public void shouldAbort_ifDownloadFails_fromInterruption() throws InterruptedException, ExecutionException, TimeoutException {
 		when(mockMusicFiles.containsFile(VIDEO_CODE)).thenReturn(false);
 		when(mockFuture.get(anyInt(),eq(TimeUnit.SECONDS))).thenThrow(new InterruptedException());
+		
+		videoQueue.download(mockDownload);
+		
+		verify(mockMusicFiles, never()).getFromUniqueId(VIDEO_CODE);
+		verify(mockVideos).markStartDownloading(mockDownload);
+		verify(mockVideos).markFailure(mockDownload);
+	}
+	
+	@Test
+	public void shouldAbort_ifDownloadFails_fromTimeout() throws InterruptedException, ExecutionException, TimeoutException {
+		when(mockMusicFiles.containsFile(VIDEO_CODE)).thenReturn(false);
+		when(mockFuture.get(anyInt(),eq(TimeUnit.SECONDS))).thenThrow(new TimeoutException());
 		
 		videoQueue.download(mockDownload);
 		
