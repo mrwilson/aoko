@@ -1,6 +1,7 @@
 package uk.co.probablyfine.aoko.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.util.Assert.isNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +22,10 @@ public class AccountDaoFunctionalTest {
 
 	private static final String USERNAME = "foo";
 
-	@Autowired AccountDao accountDao;
+	@Autowired private AccountDao accountDao;
 	
-	@Test public void testUpdatePrivileges() {
+	@Test
+	public void testUpdatePrivileges() {
 		Account account = new Account(USERNAME, "bar", "ROLE_USER");
 		accountDao.merge(account);
 		
@@ -37,8 +39,14 @@ public class AccountDaoFunctionalTest {
 
 		assertEquals("ROLE_USER", account.getRole());
 	}
+
+	@Test
+	public void getUserShouldReturnNullAccountIfNotExists() {
+		isNull(accountDao.getFromUsername(USERNAME));
+	}
 	
-	@Test public void testGetAdminsList() {
+	@Test
+	public void testGetAdminsList() {
 		Account user = new Account(USERNAME, "bar", "ROLE_USER");
 		Account admin = new Account("ADMIN", "bar", "ROLE_ADMIN");
 		accountDao.merge(user);
