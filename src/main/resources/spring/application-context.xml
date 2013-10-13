@@ -21,7 +21,7 @@
 	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"></bean>
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"></bean>
 
-	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/resources/, file:${media.art}, file:${media.repository}" />
+	<mvc:resources mapping="/resources/**" location="/, file:${media.art}, file:${media.repository}" />
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
 		<property name="maxUploadSize" value="${media.uploadlimit}" />
